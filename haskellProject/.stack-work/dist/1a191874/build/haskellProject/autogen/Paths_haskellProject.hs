@@ -46,12 +46,12 @@ getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: 
 
 
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
-bindir     = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\bin"
-libdir     = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\lib\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0-AXzMITyHPTnBSVQ4EmpHX6-haskellProject"
-dynlibdir  = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\lib\\x86_64-windows-ghc-9.10.3-b42a"
-datadir    = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\share\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0"
-libexecdir = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\libexec\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0"
-sysconfdir = "C:\\Users\\crist\\Documents\\Documentos_Universidad\\2nd_Semester\\Languages_and_Paradigms_of_Computing\\haskellPractice\\haskellProject\\.stack-work\\install\\d61e296f\\etc"
+bindir     = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\bin"
+libdir     = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\lib\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0-AXzMITyHPTnBSVQ4EmpHX6-haskellProject"
+dynlibdir  = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\lib\\x86_64-windows-ghc-9.10.3-b42a"
+datadir    = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\share\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0"
+libexecdir = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\libexec\\x86_64-windows-ghc-9.10.3-b42a\\haskellProject-0.1.0.0"
+sysconfdir = "C:\\Users\\queme\\OneDrive\\Desktop\\PracticaParadigmas\\haskellProject\\.stack-work\\install\\c327547b\\etc"
 
 getBinDir     = catchIO (getEnv "haskellProject_bindir")     (\_ -> return bindir)
 getLibDir     = catchIO (getEnv "haskellProject_libdir")     (\_ -> return libdir)
