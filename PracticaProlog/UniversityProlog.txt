@@ -1,5 +1,5 @@
-estudiante(1003,Pedro,0,0).
-estudiante(1004,Maria,0,0).
-estudiante(1005,Roberto,265,0).
-estudiante(1002,Luis,83,300).
-estudiante(1001,Ana,1243,1248).
+estudiante(1003,'Pedro',0,0).
+estudiante(1004,'Maria',0,0).
+estudiante(1005,'Roberto',265,0).
+estudiante(1002,'Luis',83,300).
+estudiante(1001,'Ana',1243,1248).
