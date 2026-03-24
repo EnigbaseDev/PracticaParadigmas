@@ -91,6 +91,19 @@ registrar_salida_estudiante :-
         write('No se encontro un registro de entrada pendiente para este estudiante.'), nl
     ).
 
+% --- Nueva opción: Calcular tiempo de permanencia de un estudiante ---
+calcular_tiempo_permanencia_estudiante :-
+    write('Ingrese el ID del estudiante: '), read(ID_Estudiante),
+    (estudiante(ID_Estudiante, Nombre, HoraEntrada, HoraSalida) ->
+        (HoraSalida =:= 0 ->
+            write('El/La estudiante '), write(Nombre), write(' aun no ha registrado su salida.'), nl
+        ;
+            Duracion is HoraSalida - HoraEntrada,
+            write('Tiempo de permanencia de '), write(Nombre), write(': '), imprimir_horas_minutos(Duracion), write(' h'), nl
+        )
+    ;
+        write('No se encontro un estudiante con ese ID.'), nl
+    ).
 
 
 % --- Listar todos los estudiantes registrados ---
@@ -142,19 +155,6 @@ ejecutar_opcion_menu(5) :- listar_estudiantes_registrados, mostrar_menu.
 ejecutar_opcion_menu(6) :- write('Saliendo del sistema...'), nl.
 ejecutar_opcion_menu(_) :- write('Opcion no valida. Intente de nuevo.'), nl, mostrar_menu.
 
-% --- Nueva opción: Calcular tiempo de permanencia de un estudiante ---
-calcular_tiempo_permanencia_estudiante :-
-    write('Ingrese el ID del estudiante: '), read(ID_Estudiante),
-    (estudiante(ID_Estudiante, Nombre, HoraEntrada, HoraSalida) ->
-        (HoraSalida =:= 0 ->
-            write('El/La estudiante '), write(Nombre), write(' aun no ha registrado su salida.'), nl
-        ;
-            Duracion is HoraSalida - HoraEntrada,
-            write('Tiempo de permanencia de '), write(Nombre), write(': '), imprimir_horas_minutos(Duracion), write(' h'), nl
-        )
-    ;
-        write('No se encontro un estudiante con ese ID.'), nl
-    ).
 
 % --- Punto de entrada principal ---
 iniciar_aplicacion :-
