@@ -121,7 +121,7 @@ guardar_datos_estudiantes :-
     open(FilePath, write, Archivo),
     forall(
         estudiante(ID, Nombre, Entrada, Salida),
-        (write(Archivo, estudiante(ID, Nombre, Entrada, Salida)), write(Archivo, '.'), nl(Archivo))
+        (writeq(Archivo, estudiante(ID, Nombre, Entrada, Salida)), write(Archivo, '.'), nl(Archivo))
     ),
     close(Archivo).
 
