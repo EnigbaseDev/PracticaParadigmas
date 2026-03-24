@@ -1,4 +1,4 @@
-# Sistema de Registro de Estudiantes - Práctica I (ST0244)
+# Sistema de Registro de Estudiantes - Práctica I
 
 Este repositorio contiene la implementación de un sistema de gestión de entrada y salida de estudiantes para la asignatura de **Programación de Lenguajes de Programación**. El objetivo es comparar el comportamiento de un mismo problema bajo dos paradigmas diferentes: **Funcional (Haskell)** y **Lógico (Prolog)**.
 
