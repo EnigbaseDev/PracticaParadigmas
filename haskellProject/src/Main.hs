@@ -4,11 +4,14 @@ import Data.Time.LocalTime (LocalTime, getZonedTime, zonedTimeToLocalTime, diffL
 import Prelude hiding (id)
 import System.IO (readFile')
 import Text.Printf (printf)
+import Data.List (find)
+
 
 main :: IO ()
 main = do
     loadedList <- loadData "University.txt"
     menuHs loadedList
+
 
 data Student = Student
     { studentName :: String
@@ -16,6 +19,20 @@ data Student = Student
     , entryTime   :: Maybe LocalTime
     , exitTime    :: Maybe LocalTime
     } deriving (Show, Read)
+
+
+loadData :: FilePath -> IO [Student]
+loadData filePath = do
+    content <- readFile' filePath
+    return (read content :: [Student])
+
+saveData :: [Student] -> FilePath -> IO ()
+saveData studentList filePath = writeFile filePath (show studentList)
+
+formatTimeOnly :: LocalTime -> String
+formatTimeOnly time = 
+    let tod = localTimeOfDay time
+    in take 8 (show tod)
 
 formatDuration :: RealFrac a => a -> String
 formatDuration duration =
@@ -25,46 +42,52 @@ formatDuration duration =
         secs = totalSecs `mod` 60
     in printf "%02d:%02d:%02d" hours mins secs
 
-formatTimeOnly :: LocalTime -> String
-formatTimeOnly time = 
-    let tod = localTimeOfDay time
-    in take 8 (show tod)
-
 sameId :: Int -> Student -> Bool
 sameId targetId s = targetId == studentId s
 
+readInt :: IO (Maybe Int)
+readInt = do
+    input <- getLine
+    case reads input of
+        [(n, "")] -> return (Just n)
+        _         -> return Nothing
+
+
 checkIn :: Int -> LocalTime -> [Student] -> (String, [Student])
 checkIn targetId ciTime studentList =
-    case filter (sameId targetId) studentList of
-        [] -> ("La/El estudiante no está matriculado", studentList)
-        (s : _) -> case entryTime s of
-            Just _ -> ("La/El estudiante ya se encuentra dentro del campus", studentList)
-            Nothing -> 
-                let updatedList = map (\x -> if sameId targetId x
-                                             then x { entryTime = Just ciTime }
-                                             else x) studentList
-                in ("La/El estudiante entró a las " ++ formatTimeOnly ciTime, updatedList)
+    case find (sameId targetId) studentList of
+        Nothing -> ("El ID buscado no existe", studentList)
+        Just s -> 
+            case (entryTime s, exitTime s) of
+                (Just _, Nothing) -> ("La/El estudiante ya se encuentra dentro del campus", studentList)
+                _ -> 
+                    let updatedList = map (\x -> if sameId targetId x
+                                                then x { entryTime = Just ciTime, exitTime = Nothing }
+                                                else x) studentList
+                    in ("La/El estudiante entró a las " ++ formatTimeOnly ciTime, updatedList)
 
 searchStudent :: Int -> [Student] -> String
 searchStudent targetId studentList =
-    case filter (sameId targetId) studentList of
-        [] -> "La/El estudiante no está matriculado en el sistema"
-        (s : _) -> case (entryTime s, exitTime s) of
-            (Just ciTime, Nothing) -> 
-                "La/El estudiante " ++ studentName s ++ " está dentro del campus. Ingreso a las: " ++ formatTimeOnly ciTime
-            _ -> "La/El estudiante no ha ingresado o ya ha salido"
+    case find (sameId targetId) studentList of
+        Nothing -> "El ID buscado no existe"
+        Just s -> 
+            case (entryTime s, exitTime s) of
+                (Just ciTime, Nothing) -> "La/El estudiante " ++ studentName s ++ " está dentro del campus. Ingreso a las: " ++ formatTimeOnly ciTime
+                _ -> "La/El estudiante no ha ingresado o ya ha salido"
 
 checkOut :: Int -> LocalTime -> [Student] -> (String, [Student])
 checkOut targetId coTime studentList = 
-    case filter (sameId targetId) studentList of
-        [] -> ("La/El estudiante no está matriculado", studentList)
-        (s : _) -> case entryTime s of
-            Nothing -> ("La/El estudiante no ha ingresado al campus", studentList)
-            Just _ ->
-                let updatedList = map (\x -> if sameId targetId x
-                                             then x { exitTime = Just coTime }
-                                             else x) studentList
-                in ("La/El estudiante salió a las " ++ formatTimeOnly coTime, updatedList)
+    case find (sameId targetId) studentList of
+        Nothing -> ("El ID buscado no existe", studentList)
+        Just s -> 
+            case (entryTime s, exitTime s) of
+                (Nothing, _) -> ("La/El estudiante no ha ingresado al campus", studentList)
+                (_, Just _)  -> ("La/El estudiante ya registró su salida", studentList)
+                (Just _, Nothing) ->
+                    let updatedList = map (\x -> if sameId targetId x
+                                                then x { exitTime = Just coTime }
+                                                else x) studentList
+                    in ("La/El estudiante salió a las " ++ formatTimeOnly coTime, updatedList)
 
 calcTime :: LocalTime -> LocalTime -> String
 calcTime inTime outTime =   
@@ -78,13 +101,6 @@ listAllStudents studentList =
         formatStudent s = " | ID: " ++ show (studentId s) ++ " | Nombre: " ++ studentName s ++ " | Entrada: " ++ formatTime (entryTime s) ++ " | Salida: " ++ formatTime (exitTime s)
     in unlines (map formatStudent studentList)
 
-saveData :: [Student] -> FilePath -> IO ()
-saveData studentList filePath = writeFile filePath (show studentList)
-
-loadData :: FilePath -> IO [Student]
-loadData filePath = do
-    content <- readFile' filePath
-    return (read content :: [Student])
 
 menuHs :: [Student] -> IO ()
 menuHs studentList = do
@@ -97,42 +113,64 @@ menuHs studentList = do
     putStrLn "6. Salir"
     option <- getLine
     case option of
+
         "1" -> do
             putStrLn "Ingrese el ID del estudiante:"
-            id <- read <$> getLine
-            zonedTime <- getZonedTime
-            let ciTime = zonedTimeToLocalTime zonedTime
-            let (message, updatedList) = checkIn id ciTime studentList
-            putStrLn message
-            saveData updatedList "University.txt"
-            menuHs updatedList
+            maybeId <- readInt
+            case maybeId of
+                Nothing -> do
+                    putStrLn "ID inválido, ingrese solo números."
+                    menuHs studentList
+                Just id -> do
+                    zonedTime <- getZonedTime
+                    let ciTime = zonedTimeToLocalTime zonedTime
+                    let (message, updatedList) = checkIn id ciTime studentList
+                    putStrLn message
+                    saveData updatedList "University.txt" 
+                    menuHs updatedList
+
         "2" -> do
             putStrLn "Ingrese el ID del estudiante a buscar:"
-            id <- read <$> getLine
-            putStrLn (searchStudent id studentList)
+            maybeId <- readInt
+            case maybeId of
+                Nothing -> putStrLn "ID inválido, ingrese solo números."
+                Just id -> putStrLn (searchStudent id studentList)
             menuHs studentList
+
         "3" -> do
             putStrLn "Ingrese el ID del estudiante que sale:"
-            id <- read <$> getLine
-            zonedTime <- getZonedTime
-            let coTime = zonedTimeToLocalTime zonedTime
-            let (message, updatedList) = checkOut id coTime studentList
-            putStrLn message
-            saveData updatedList "University.txt"
-            menuHs updatedList
+            maybeId <- readInt
+            case maybeId of
+                Nothing -> do
+                    putStrLn "ID inválido, ingrese solo números."
+                    menuHs studentList
+                Just id -> do
+                    zonedTime <- getZonedTime
+                    let coTime = zonedTimeToLocalTime zonedTime
+                    let (message, updatedList) = checkOut id coTime studentList
+                    putStrLn message
+                    saveData updatedList "University.txt"
+                    menuHs updatedList
+
         "4" -> do
             putStrLn "Ingrese el ID del estudiante para calcular el tiempo de estancia:"
-            id <- read <$> getLine
-            case filter (sameId id) studentList of
-                [] -> putStrLn "El estudiante no está matriculado"
-                (Student _ _ Nothing _ : _) -> putStrLn "El estudiante no ha ingresado"
-                (Student _ _ (Just _) Nothing : _) -> putStrLn "El estudiante aún no ha salido"
-                (Student _ _ (Just ciTime) (Just coTime) : _) -> putStrLn (calcTime ciTime coTime)
+            maybeId <- readInt
+            case maybeId of
+                Nothing -> putStrLn "ID inválido, ingrese solo números."
+                Just id ->
+                    case find (sameId id) studentList of
+                        Nothing -> putStrLn "El estudiante no está matriculado"
+                        Just s  -> case (entryTime s, exitTime s) of
+                                        (Nothing, _)            -> putStrLn "El estudiante no ha ingresado"
+                                        (Just _, Nothing)       -> putStrLn "El estudiante aún no ha salido"
+                                        (Just ciTime, Just coTime) -> putStrLn (calcTime ciTime coTime)
             menuHs studentList
+
         "5" -> do
-            putStrLn "--- DATOS EN EL ARCHIVO ---"
+            putStrLn "--- LISTA DE ESTUDIANTES ---"
             putStr (listAllStudents studentList)
             menuHs studentList
+            
         "6" -> putStrLn "Saliendo del sistema."
         _ -> do
             putStrLn "Opción no válida, por favor intente de nuevo."
